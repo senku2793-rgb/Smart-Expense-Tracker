@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Expense Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>💰 Smart Expense Tracker</h1>
+  <p>Track daily expenses & visualize spending</p>
+</header>
+
+<div class="container">
+
+  <!-- Expense Input -->
+  <div class="card">
+    <h2>Add Expense</h2>
+    <input type="date" id="date">
+    <input type="number" id="amount" placeholder="Amount (RM)">
+    <select id="category">
+      <option>Food</option>
+      <option>Transport</option>
+      <option>Education</option>
+      <option>Entertainment</option>
+      <option>Other</option>
+    </select>
+    <button onclick="addExpense()">Add</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="card">
+    <h2>Monthly Summary</h2>
+    <p><b>Total Spending:</b> RM <span id="total">0</span></p>
+    <ul id="summary"></ul>
+  </div>
+
+  <!-- Chart -->
+  <div class="card">
+    <h2>Spending Distribution</h2>
+    <canvas id="expenseChart"></canvas>
+  </div>
+
+</div>
+
+<footer>
+  <p>SDG 8 & SDG 12 – Digital Financial Awareness</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
