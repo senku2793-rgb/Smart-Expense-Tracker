@@ -1,160 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Smart Expense Tracker</title>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- jsPDF for PDF export -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Expense Tracker - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <div id="app" class="fade-in">
-    <header class="topbar">
-      <h1>Smart Expense Tracker</h1>
-      <div class="top-controls">
-        <button id="btnToggleTheme" class="small">Toggle Dark</button>
-        <span id="currentUserLabel" class="muted"></span>
-        <button id="btnLogout" class="small danger" hidden>Logout</button>
-      </div>
-    </header>
-
-    <main id="main">
-      <!-- LOGIN / REGISTER -->
-      <section id="view-auth" class="card page">
-        <div class="split">
-          <div>
-            <h2>Welcome</h2>
-            <p>Login to your account or register a new one.</p>
-            <form id="formLogin" class="form">
-              <label>Username<input id="loginUser" required /></label>
-              <label>Password<input id="loginPass" type="password" required /></label>
-              <div class="row">
-                <button type="submit" class="primary">Login</button>
-                <button id="btnShowRegister" type="button" class="secondary">Register</button>
-              </div>
-            </form>
-          </div>
-
-          <div>
-            <h3>Register</h3>
-            <form id="formRegister" class="form">
-              <label>Username<input id="regUser" required /></label>
-              <label>Password
-                <input id="regPass" type="password" required />
-                <small id="pwStrength" class="muted"></small>
-              </label>
-              <label>Role
-                <select id="regRole">
-                  <option value="customer">Customer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </label>
-              <div class="row">
-                <button type="submit" class="primary">Create</button>
-                <button id="btnClearReg" type="button" class="secondary">Clear</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <!-- DASHBOARD (multiple pages via JS views) -->
-      <section id="view-dashboard" class="page" hidden>
-        <nav class="nav">
-          <button class="nav-btn" data-view="dashboard-home">Home</button>
-          <button class="nav-btn" data-view="transactions">Transactions</button>
-          <button class="nav-btn" data-view="categories">Categories</button>
-          <button class="nav-btn" data-view="admin" id="navAdmin" style="display:none">Admin</button>
-          <button class="nav-btn" data-view="about">About</button>
-        </nav>
-
-        <div id="view-content" class="content card">
-          <!-- HOME -->
-          <div id="dashboard-home">
-            <h2>Overview</h2>
-            <div class="grid">
-              <div class="panel card">
-                <h3>Quick add</h3>
-                <form id="formAddTx" class="form">
-                  <label>Amount<input id="txAmount" type="number" step="0.01" required /></label>
-                  <label>Category
-                    <select id="txCategory"></select>
-                  </label>
-                  <label>Date<input id="txDate" type="date" required /></label>
-                  <label>Description<input id="txDesc" /></label>
-                  <div class="row">
-                    <button type="submit" class="primary">Add</button>
-                    <button id="btnResetAdd" type="button" class="secondary">Reset</button>
-                  </div>
-                </form>
-              </div>
-
-              <div class="panel card">
-                <h3>Filters & Export</h3>
-                <label>Month
-                  <input id="filterMonth" type="month" />
-                </label>
-                <div class="row">
-                  <button id="btnFilter" class="small">Apply</button>
-                  <button id="btnClearFilter" class="small">Clear</button>
-                </div>
-                <div class="row">
-                  <button id="btnExportCSV" class="small">Export CSV</button>
-                  <button id="btnExportPDF" class="small">Export PDF</button>
-                </div>
-                <hr />
-                <h4>Activity Log</h4>
-                <ul id="activityList" class="log"></ul>
-              </div>
-
-              <div class="panel card large">
-                <h3>Spending Chart</h3>
-                <canvas id="chartSpending" height="120"></canvas>
-              </div>
+    <div class="login-container">
+        <header class="landing-header">
+            <h1><i class="fas fa-wallet"></i> SmartFund</h1>
+            <p>Aligning with SDG 8 & 9 for Financial Sustainability</p>
+        </header>
+        
+        <form id="loginForm" class="glass-panel">
+            <h2>Welcome Back</h2>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Username" required>
             </div>
-          </div>
-
-          <!-- TRANSACTIONS -->
-          <div id="transactions" hidden>
-            <h2>Transactions</h2>
-            <table id="txTable" class="table"></table>
-          </div>
-
-          <!-- CATEGORIES -->
-          <div id="categories" hidden>
-            <h2>Categories</h2>
-            <form id="formCategory" class="form inline">
-              <input id="newCategory" placeholder="New category name" />
-              <button id="btnAddCategory" class="small">Add</button>
-            </form>
-            <ul id="categoryList"></ul>
-          </div>
-
-          <!-- ADMIN -->
-          <div id="admin" hidden>
-            <h2>Admin - All Users</h2>
-            <table id="adminUsers" class="table"></table>
-          </div>
-
-          <!-- ABOUT -->
-          <div id="about" hidden>
-            <h2>About</h2>
-            <p>Smart Expense Tracker — client-side demo. Designed for the EEC3733 assignment. Stores data in localStorage.</p>
-          </div>
-        </div>
-      </section>
-
-      <footer class="footer muted">
-        Built for deployment on GitHub Pages — client-only app.
-      </footer>
-    </main>
-  </div>
-
-  <script src="app.js"></script>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <div class="role-select">
+                <label><input type="radio" name="role" value="customer" checked> Customer</label>
+                <label><input type="radio" name="role" value="admin"> Admin</label>
+            </div>
+            <button type="submit" class="btn-primary">Login</button>
+            <p id="errorMsg" class="error"></p>
+        </form>
+        
+        <footer class="landing-footer">
+            <small>System for EEC 3733 Assignment</small>
+        </footer>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
