@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body onload="loadDashboard()">
+
+<header>
+  <h1>📊 Expense Dashboard</h1>
+  <button onclick="toggleDarkMode()">🌙 Dark</button>
+  <button onclick="exportCSV()">⬇ CSV</button>
+  <button onclick="exportPDF()">🖨 PDF</button>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Filter by Month</h2>
+    <input type="month" id="monthFilter" onchange="applyMonthFilter()">
+  </div>
+
+  <div class="card" id="customerPanel">
+    <h2>Add Expense</h2>
+    <input type="date" id="dateInput">
+    <input type="number" id="amountInput" placeholder="Amount (RM)">
+    <select id="categorySelect"></select>
+    <button onclick="addExpense()">Add</button>
+  </div>
+
+  <div class="card">
+    <h2>Summary</h2>
+    <p>Total: RM <span id="totalSpan">0</span></p>
+    <ul id="summary"></ul>
+  </div>
+
+  <div class="card">
+    <h2>Chart</h2>
+    <canvas id="expenseChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Manage Categories</h2>
+    <input id="newCategory" placeholder="New Category">
+    <button onclick="addCategory()">Add Category</button>
+    <ul id="categoryList"></ul>
+  </div>
+
+  <div class="card">
+    <h2>User Activity Log</h2>
+    <ul id="activityLog"></ul>
+  </div>
+
+  <div class="card" id="adminPanel" style="display:none;">
+    <h2>Admin – All Users</h2>
+    <div id="adminData"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
