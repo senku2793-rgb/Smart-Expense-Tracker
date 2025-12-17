@@ -1,6 +1,3 @@
-// =======================
-// OOP: Expense Class
-// =======================
 class Expense {
   constructor(date, amount, category) {
     this.date = date;
@@ -9,77 +6,177 @@ class Expense {
   }
 }
 
-// =======================
-// Model
-// =======================
-let expenses = [];
-let chart;
+function hash(p){ return btoa(p); }
+function getUsers(){ return JSON.parse(localStorage.getItem("users")) || {}; }
+function saveUsers(u){ localStorage.setItem("users", JSON.stringify(u)); }
 
-// =======================
-// Controller Functions
-// =======================
-function addExpense() {
-  const date = document.getElementById("date").value;
-  const amount = parseFloat(document.getElementById("amount").value);
-  const category = document.getElementById("category").value;
+function isStrongPassword(p){
+  return p.length>=8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /[0-9]/.test(p);
+}
 
-  if (!date || !amount) {
-    alert("Please enter date and amount");
+/* REGISTER */
+function register(){
+  if(!isStrongPassword(regPassword.value)){
+    strengthMsg.innerText="Weak password!";
     return;
   }
+  let users=getUsers();
+  if(users[regUsername.value]) return alert("User exists");
 
-  const expense = new Expense(date, amount, category);
-  expenses.push(expense);
-
-  updateSummary();
-  updateChart();
+  users[regUsername.value]={
+    password:hash(regPassword.value),
+    role:regRole.value,
+    expenses:[],
+    categories:["Food","Transport","Education","Entertainment","Other"],
+    activity:[]
+  };
+  saveUsers(users);
+  alert("Registered!");
 }
 
-// =======================
-// View Updates
-// =======================
-function updateSummary() {
-  let total = 0;
-  let categoryTotals = {};
+/* LOGIN */
+function login(){
+  let users=getUsers();
+  let u=loginUsername.value;
+  if(!users[u]||users[u].password!==hash(loginPassword.value))
+    return alert("Invalid login");
+  localStorage.setItem("currentUser",u);
+  window.location="dashboard.html";
+}
 
-  expenses.forEach(e => {
-    total += e.amount;
-    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+/* RESET */
+function resetPassword(){
+  let users=getUsers();
+  if(!users[resetUsername.value]) return alert("User not found");
+  users[resetUsername.value].password=hash(newPassword.value);
+  saveUsers(users);
+  alert("Password reset!");
+}
+
+function logout(){
+  localStorage.removeItem("currentUser");
+  window.location="index.html";
+}
+
+/* DASHBOARD */
+let currentUser,userData,chart,activeMonth=null;
+
+function loadDashboard(){
+  currentUser=localStorage.getItem("currentUser");
+  if(!currentUser) return logout();
+
+  let users=getUsers();
+  userData=users[currentUser];
+
+  if(userData.role==="admin"){
+    customerPanel.style.display="none";
+    adminPanel.style.display="block";
+    loadAdminView();
+  }
+
+  loadCategories();
+  loadActivityLog();
+  updateSummary();
+  updateChart();
+
+  if(localStorage.getItem("dark")==="true")
+    document.body.classList.add("dark");
+}
+
+/* EXPENSE */
+function addExpense(){
+  userData.expenses.push(new Expense(dateInput.value,parseFloat(amountInput.value),categorySelect.value));
+  userData.activity.push({action:"Add expense",time:new Date().toLocaleString()});
+  let users=getUsers(); users[currentUser]=userData; saveUsers(users);
+  updateSummary(); updateChart(); loadActivityLog();
+}
+
+/* CATEGORY */
+function loadCategories(){
+  categorySelect.innerHTML="";
+  categoryList.innerHTML="";
+  userData.categories.forEach(c=>{
+    categorySelect.innerHTML+=`<option>${c}</option>`;
+    categoryList.innerHTML+=`<li>${c}</li>`;
   });
+}
 
-  document.getElementById("total").innerText = total.toFixed(2);
-
-  const summary = document.getElementById("summary");
-  summary.innerHTML = "";
-
-  for (let cat in categoryTotals) {
-    const percent = ((categoryTotals[cat] / total) * 100).toFixed(1);
-    summary.innerHTML += `<li>${cat}: RM ${categoryTotals[cat].toFixed(2)} (${percent}%)</li>`;
+function addCategory(){
+  if(!userData.categories.includes(newCategory.value)){
+    userData.categories.push(newCategory.value);
+    let users=getUsers(); users[currentUser]=userData; saveUsers(users);
+    loadCategories();
   }
 }
 
-// =======================
-// Chart (Visualization)
-// =======================
-function updateChart() {
-  let categoryTotals = {};
+/* FILTER */
+function applyMonthFilter(){
+  activeMonth=monthFilter.value;
+  updateSummary(); updateChart();
+}
 
-  expenses.forEach(e => {
-    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+function filtered(){
+  if(!activeMonth) return userData.expenses;
+  return userData.expenses.filter(e=>e.date.startsWith(activeMonth));
+}
+
+/* SUMMARY */
+function updateSummary(){
+  let total=0,cats={};
+  filtered().forEach(e=>{
+    total+=e.amount;
+    cats[e.category]=(cats[e.category]||0)+e.amount;
   });
+  totalSpan.innerText=total.toFixed(2);
+  summary.innerHTML="";
+  for(let c in cats){
+    summary.innerHTML+=`<li>${c}: RM ${cats[c]}</li>`;
+  }
+}
 
-  const labels = Object.keys(categoryTotals);
-  const data = Object.values(categoryTotals);
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(document.getElementById("expenseChart"), {
-    type: 'pie',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data
-      }]
-    }
+/* CHART */
+function updateChart(){
+  let cats={};
+  filtered().forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);
+  if(chart) chart.destroy();
+  chart=new Chart(expenseChart,{
+    type:"pie",
+    data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats)}]},
+    options:{animation:{duration:1200}}
   });
+}
+
+/* ACTIVITY */
+function loadActivityLog(){
+  activityLog.innerHTML="";
+  (userData.activity||[]).slice().reverse().forEach(a=>{
+    activityLog.innerHTML+=`<li>${a.time} – ${a.action}</li>`;
+  });
+}
+
+/* ADMIN */
+function loadAdminView(){
+  let users=getUsers();
+  adminData.innerHTML="";
+  for(let u in users){
+    let t=users[u].expenses.reduce((s,e)=>s+e.amount,0);
+    adminData.innerHTML+=`<p>${u} (${users[u].role}) – RM ${t}</p>`;
+  }
+}
+
+/* EXPORT */
+function exportCSV(){
+  let csv="Date,Category,Amount\n";
+  userData.expenses.forEach(e=>csv+=`${e.date},${e.category},${e.amount}\n`);
+  let a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv]));
+  a.download="expenses.csv";
+  a.click();
+}
+function exportPDF(){ window.print(); }
+
+/* DARK MODE */
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("dark",document.body.classList.contains("dark"));
 }
