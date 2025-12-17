@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand"><i class="fas fa-chart-line"></i> SmartFund Dashboard</div>
+        <div class="nav-controls">
+            <span id="userDisplay">Welcome, User</span>
+            <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
+            <button id="logoutBtn" class="btn-danger">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <section class="summary-cards">
+            <div class="card income">
+                <h3>Total Income</h3>
+                <p id="totalIncome">$0.00</p>
+            </div>
+            <div class="card expense">
+                <h3>Total Expense</h3>
+                <p id="totalExpense">$0.00</p>
+            </div>
+            <div class="card balance">
+                <h3>Net Balance</h3>
+                <p id="netBalance">$0.00</p>
+            </div>
+        </section>
+
+        <div class="grid-container">
+            <section class="panel input-panel">
+                <h3><i class="fas fa-plus-circle"></i> Add Transaction</h3>
+                <form id="transactionForm">
+                    <input type="text" id="desc" placeholder="Description (e.g. Salary, Food)" required>
+                    <input type="number" id="amount" placeholder="Amount" required>
+                    <select id="type">
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                    <select id="category">
+                        <option value="Salary">Salary</option>
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button type="submit" class="btn-success">Add Record</button>
+                </form>
+            </section>
+
+            <section class="panel chart-panel">
+                <h3>Financial Overview</h3>
+                <canvas id="expenseChart"></canvas>
+            </section>
+        </div>
+
+        <section class="panel action-panel">
+            <div class="filters">
+                <button onclick="app.exportCSV()" class="btn-secondary"><i class="fas fa-file-csv"></i> CSV</button>
+                <button onclick="app.simulateNotify('whatsapp')" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp Report</button>
+                <button onclick="app.simulateNotify('email')" class="btn-email"><i class="fas fa-envelope"></i> Email Report</button>
+            </div>
+        </section>
+
+        <section class="panel list-panel">
+            <h3>Recent Activity</h3>
+            <ul id="transactionList" class="transaction-list">
+                </ul>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
